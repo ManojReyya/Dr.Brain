@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dr. Brain - Brain Tumor Detection</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background: url('https://source.unsplash.com/1600x900/?health,technology') no-repeat center center/cover;
+            background-attachment: fixed;
+            color: #fff;
+            text-align: center;
+        }
+        .container {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0px 0px 30px rgba(255, 255, 255, 0.3);
+            margin-top: 50px;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .card:hover {
+            transform: scale(1.05);
+            box-shadow: 0px 0px 20px rgba(255, 255, 255, 0.5);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #ff758c, #ff7eb3);
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #ff7eb3, #ff758c);
+            transform: scale(1.1);
+        }
+        footer {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="#">Dr. Brain 🧠</a>
+    </nav>
+
+    <div class="container">
+        <h1>Welcome to Dr. Brain</h1>
+        <p class="lead">Upload your MRI scan to detect brain tumors and receive prevention tips.</p>
+
+        <section id="upload" class="mt-5">
+            <div class="card shadow p-4">
+                <h2>Upload Your MRI Image</h2>
+                <input type="file" id="imageUpload" class="form-control" accept="image/*">
+                <button class="btn btn-primary mt-3" onclick="uploadImage()">Classify</button>
+            </div>
+        </section>
+
+        <section id="result" class="mt-5">
+            <div class="alert alert-info text-center" style="display:none;" id="resultBox">
+                <h4>Prediction Result</h4>
+                <p id="result"></p>
+                <img id="uploadedImage" src="" class="img-fluid mt-3" style="display:none; max-width:300px; border-radius: 10px;" />
+            </div>
+        </section>
+
+        <section id="prevention" class="mt-5">
+            <h2>Tips to Prevent Brain Tumors</h2>
+            <ul class="list-group text-dark mt-3">
+                <li class="list-group-item">🧠 Maintain a healthy diet with fruits and vegetables.</li>
+                <li class="list-group-item">🚴 Stay physically active and exercise regularly.</li>
+                <li class="list-group-item">🚭 Avoid smoking and excessive alcohol consumption.</li>
+                <li class="list-group-item">💧 Stay hydrated and minimize exposure to radiation.</li>
+                <li class="list-group-item">🏥 Go for regular medical check-ups.</li>
+            </ul>
+        </section>
+    </div>
+
+    <footer class="text-white text-center py-3 mt-5">
+        <p>&copy; 2025 Dr. Brain. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+        function uploadImage() {
+            let fileInput = document.getElementById('imageUpload');
+            if (!fileInput.files[0]) {
+                alert('Please select an image file.');
+                return;
+            }
+            let formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+
+            fetch('/predict', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                let resultBox = document.getElementById('resultBox');
+                let resultText = document.getElementById('result');
+                let uploadedImage = document.getElementById('uploadedImage');
+                
+                if (data.error) {
+                    resultText.innerText = "Error: " + data.error;
+                } else {
+                    resultText.innerText = `Predicted: ${data.class} (Confidence: ${data.confidence.toFixed(2)})`;
+                    uploadedImage.src = data.image_url;
+                    uploadedImage.style.display = 'block';
+                }
+                resultBox.style.display = 'block';
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</body>
+</html>
